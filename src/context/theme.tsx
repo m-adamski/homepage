@@ -1,47 +1,25 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
+import { useConfigStore } from "@/stores/config";
 
-type ProviderProps = {
+type Props = {
     children: ReactNode
 }
 
-type ContextProps = {
-    theme: "light" | "dark",
-    setTheme: (theme: "light" | "dark") => void
-}
-
-// Create context
-const ThemeContext = createContext<ContextProps>({
-    theme: "light",
-    setTheme: theme => null
-});
-
-// Create hook
-const useTheme = () => {
-    return useContext<ContextProps>(ThemeContext);
-};
-
-const ThemeProvider = ({ children }: ProviderProps) => {
-    const [theme, setTheme] = useState<"light" | "dark">(window.matchMedia("(prefers-color-scheme: dark)") ? "dark" : "light");
-
-    // Add Event Listener
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
-        setTheme(event.matches ? "dark" : "light");
-    });
+const ThemeProvider = ({ children }: Props) => {
+    const theme = useConfigStore((store) => store.theme);
 
     useEffect(() => {
         document.documentElement.classList.remove("dark");
         document.documentElement.classList.remove("light");
-        
+
         document.documentElement.classList.add(theme);
     }, [theme]);
 
     return (
-        <ThemeContext.Provider value={ { theme: theme, setTheme: setTheme } }>
-            { children }
-        </ThemeContext.Provider>
+        <>{ children }</>
     );
 };
 
-export { ThemeProvider, useTheme };
+export { ThemeProvider };

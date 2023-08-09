@@ -6,6 +6,7 @@ import { configSchema, ConfigSchema } from "@/schema/config";
 
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/Form";
 import {
     Dialog,
@@ -16,6 +17,7 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/Dialog";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 type Props = {
     config: ConfigSchema,
@@ -28,11 +30,10 @@ const ConfigDialog = ({ config, onSubmit, children }: Props) => {
         resolver: zodResolver(configSchema),
         defaultValues: {
             query: config.query,
-            refreshInterval: config.refreshInterval
+            refreshInterval: config.refreshInterval,
+            autoRefresh: config.autoRefresh
         }
     });
-
-    // const onSubmit = (data: ConfigSchema) => onConfigSubmit(data);
 
     return (
         <Dialog>
@@ -79,8 +80,24 @@ const ConfigDialog = ({ config, onSubmit, children }: Props) => {
                             </FormItem>
                         ) } />
 
+                        <FormField name="autoRefresh" control={ configForm.control } render={ ({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                    <Checkbox checked={ field.value } onCheckedChange={ field.onChange } />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                    <FormLabel>Auto refresh</FormLabel>
+                                    <FormDescription>
+                                        You can decide whether the photos should be refreshed automatically after a certain number of minutes
+                                    </FormDescription>
+                                </div>
+                            </FormItem>
+                        ) } />
+
                         <DialogFooter>
-                            <Button type="submit">Save changes</Button>
+                            <DialogClose asChild>
+                                <Button type="submit">Save changes</Button>
+                            </DialogClose>
                         </DialogFooter>
                     </form>
                 </Form>
