@@ -11,6 +11,7 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /home/node/app
 
 # Install node packages
+# https://mannes.tech/production-install/
 COPY package.json package-lock.json ./
 RUN npm ci
 
