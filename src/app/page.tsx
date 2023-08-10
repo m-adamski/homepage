@@ -88,7 +88,7 @@ const Homepage = () => {
         if (!photo || (autoRefresh && moment(lastRefresh).add(refreshInterval, "minutes").isBefore())) {
             refreshBackground();
         }
-    }, []);
+    }, []); // eslint-disable-line
 
     return (
         <Container>
