@@ -9,7 +9,7 @@ export async function GET(request: Request) {
         const randomPhoto = await getRandom(query);
 
         if (!randomPhoto) {
-            return new Response("Error while getting random photo", { status: 500 });
+            return NextResponse.json({ message: "An error occurred while trying to fetch a new background" }, { status: 500 });
         }
 
         return NextResponse.json(randomPhoto, {
@@ -39,5 +39,5 @@ export async function GET(request: Request) {
         // });
     }
 
-    return new Response("Missing required params", { status: 400 });
+    return NextResponse.json({ message: "Missing required 'query' param" }, { status: 400 });
 }

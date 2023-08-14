@@ -1,17 +1,19 @@
-import { decode } from "blurhash";
+require("console-stamp")(console);
 
 import { Photo } from "@/types/photo";
 import { randomPhotoSchema } from "@/schema/unsplash";
 import { getDataUrl } from "@/lib/blur";
 
 const getRandom = async (query: string): Promise<Photo | null> => {
+    console.log("Fetching data from unsplash API..");
+
     const response = await fetch(`https://api.unsplash.com/photos/random?orientation=landscape&query=${ query }`, {
         headers: { Authorization: `Client-ID ${ process.env.UNSPLASH_ACCESS_TOKEN }` },
         cache: "no-cache"
     });
 
     if (!response.ok) {
-        console.error("Request error:", response.statusText);
+        console.error(`An error occurred while fetching data: ${ response.status } ${ response.statusText }`);
         return null;
     }
 
@@ -29,7 +31,7 @@ const getRandom = async (query: string): Promise<Photo | null> => {
             }
         };
     } catch (err) {
-        console.error("Error while parsing response:", err);
+        console.error("An error occurred while parsing data:", err);
         return null;
     }
 };

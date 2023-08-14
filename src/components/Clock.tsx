@@ -14,7 +14,7 @@ const Clock = () => {
     }, []);
 
     return (
-        <p className="fixed right-16 top-16 font-light text-7xl text-white text-shadow">
+        <p className="fixed right-16 top-16 font-light text-7xl text-white text-shadow z-50">
             { date.toLocaleTimeString([], { timeStyle: "short" }) }
         </p>
     );

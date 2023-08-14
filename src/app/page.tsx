@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { MoonStar, RefreshCw, Settings, Sun } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { useConfigStore } from "@/stores/config";
 import { ConfigSchema } from "@/schema/config";
 import { Photo } from "@/types/photo";
@@ -22,6 +23,7 @@ const Container = dynamic(() => import("@/components/Container"), { ssr: false }
 const Homepage = () => {
     const { toast } = useToast();
     const [isConfigDialogOpen, setConfigDialogOpen] = useState<boolean>(false);
+    const [backgroundClassName, setBackgroundClassName] = useState<string>("opacity-100");
 
     const [
         query,
@@ -29,26 +31,34 @@ const Homepage = () => {
         autoRefresh,
         lastRefresh,
         theme,
-        photo,
+        background,
+        nextBackground,
         setQuery,
         setTheme,
-        setPhoto,
+        setBackground,
+        setNextBackground,
         setRefreshInterval,
         setAutoRefresh,
-        resetRefresh
+        resetRefresh,
+        rewriteBackground,
+        resetNextBackground
     ] = useConfigStore((state) => [
         state.query,
         state.refreshInterval,
         state.autoRefresh,
         state.lastRefresh,
         state.theme,
-        state.photo,
+        state.background,
+        state.nextBackground,
         state.setQuery,
         state.setTheme,
-        state.setPhoto,
+        state.setBackground,
+        state.setNextBackground,
         state.setRefreshInterval,
         state.setAutoRefresh,
-        state.resetRefresh
+        state.resetRefresh,
+        state.rewriteBackground,
+        state.resetNextBackground
     ]);
 
     // Save config to the localStorage
@@ -73,36 +83,63 @@ const Homepage = () => {
         const response = await fetch(`/server/photo?query=${ query }`);
 
         if (!response.ok) {
-            console.log("Error while fetching data");
+            toast({
+                title: "Refresh",
+                description: "An error occurred while fetching background image. Please wait a while and try again..",
+                variant: "destructive"
+            });
+
+            return;
         }
 
+        // Parse response
         const responseData: Photo = await response.json();
 
-        // Update state
-        setPhoto(responseData);
-        resetRefresh();
+        // Animate background using CSS opacity
+        setNextBackground(responseData);
+        setBackgroundClassName("opacity-0"); // duration-700
+
+        setTimeout(() => {
+            resetRefresh();
+            rewriteBackground();
+            setBackgroundClassName("opacity-100");
+
+            setTimeout(() => {
+                resetNextBackground();
+            }, 2000);
+        }, 1000);
     };
 
     // Refresh background when autoRefresh is enabled and it's time to refresh
     useEffect(() => {
-        if (!photo || (autoRefresh && moment(lastRefresh).add(refreshInterval, "minutes").isBefore())) {
+        if (!background || (autoRefresh && moment(lastRefresh).add(refreshInterval, "minutes").isBefore())) {
             refreshBackground();
         }
     }, []); // eslint-disable-line
 
     return (
         <Container>
-            { photo &&
-                <Background imageUrl={ photo.url } blurDataUrl={ photo.blurHash } description={ photo.location || photo.author.name } />
+            { background &&
+                <Background imageUrl={ background.url }
+                            blurDataUrl={ background.blurHash }
+                            description={ background.location || background.author.name }
+                            className={ cn(backgroundClassName, "z-10") } />
+            }
+
+            { nextBackground &&
+                <Background imageUrl={ nextBackground.url }
+                            blurDataUrl={ nextBackground.blurHash }
+                            description={ nextBackground.location || nextBackground.author.name }
+                            className="z-0" />
             }
 
             <Clock />
 
             <div className="fixed left-0 bottom-0 w-full grid grid-cols-3 items-center p-10 z-50">
-                { photo &&
+                { background &&
                     <p className="text-left text-gray-200 text-shadow">
-                        Photo by <Link href={ photo.author.portfolioUrl } className="hover:text-gray-500"
-                                       rel="nofollow">{ photo.author.name }</Link>
+                        Photo by <Link href={ background.author.portfolioUrl } className="hover:text-gray-500"
+                                       rel="nofollow">{ background.author.name }</Link>
                     </p>
                 }
 
@@ -127,8 +164,8 @@ const Homepage = () => {
 
                 </div>
 
-                { photo &&
-                    <p className="text-right text-gray-200 text-shadow">{ photo.location || "" }</p>
+                { background &&
+                    <p className="text-right text-gray-200 text-shadow">{ background.location || "" }</p>
                 }
             </div>
         </Container>
