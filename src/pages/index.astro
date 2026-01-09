@@ -1,0 +1,229 @@
+---
+import Layout from "../layouts/layout.astro";
+import Clock from "../components/clock.astro";
+---
+
+<Layout>
+    <div x-data="application">
+        <div class="relative w-full h-screen">
+            <Clock />
+
+            <div class="absolute bottom-0 left-0 w-full grid grid-cols-3 grid-rows-1 items-center p-10 z-30">
+                <div class="text-white">
+                    Photo by <a x-data x-bind:href="config.background.author.portfolio" x-text="config.background.author.name"
+                                rel="noreferrer"></a>
+                </div>
+
+                <!-- Options -->
+                <div class="flex justify-center gap-x-2">
+                    <button type="button"
+                            x-data x-on:click="openConfigurationDialog"
+                            class="size-10 inline-flex justify-center items-center text-sm font-semibold rounded-full border border-transparent text-white cursor-pointer bg-gray-800/70 hover:bg-gray-800 focus:bg-gray-800/80 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                             class="shrink-0 size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        </svg>
+                    </button>
+                    <button type="button"
+                            x-data x-on:click="refreshBackground"
+                            class="size-10 inline-flex justify-center items-center text-sm font-semibold rounded-full border border-transparent text-white cursor-pointer bg-gray-800/70 hover:bg-gray-800 focus:bg-gray-800/80 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                             class="shrink-0 size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="text-white text-right" x-data x-text="config.background.location"></div>
+            </div>
+
+            <!-- Gradient -->
+            <div class="absolute w-full h-32 bottom-0 left-0 z-20 bg-linear-to-t from-gray-900/80 from-20% to-transparent">&nbsp;</div>
+
+            <!-- Background Canvas -->
+            <canvas id="background-blur-canvas" class="absolute w-full h-full top-0 left-0 z-0 object-cover" width="32" height="32" />
+            <canvas id="background-canvas" class="absolute w-full h-full top-0 left-0 z-10 opacity-0 object-cover transition duration-1000"
+                    width="1920" height="1080" />
+        </div>
+
+        <!-- Configuration dialog -->
+        <dialog id="config-dialog" class="fixed inset-0 size-auto max-h-none max-w-none overflow-y-auto bg-gray-900/50 backdrop-blur-sm z-40">
+            <div class="flex items-center justify-center w-full h-full">
+
+                <!-- Main content -->
+                <div class="relative flex flex-col gap-y-5 w-full max-w-lg px-10 py-10 overflow-hidden rounded-lg bg-gray-900 text-left">
+
+                    <!-- Close -->
+                    <div class="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
+                        <button type="button" x-on:click="closeConfigurationDialog"
+                                class="rounded-md bg-gray-800 text-gray-400 cursor-pointer hover:text-gray-300 focus:outline-1 focus:outline-offset-2 focus:outline-white">
+                            <span class="sr-only">Close</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" class="size-6">
+                                <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <h2 class="text-gray-200 text-lg font-semibold">Configuration</h2>
+                    <p class="text-sm text-pretty text-gray-400">
+                        The configuration is stored in the local storage of your browser. The entered values affect the displayed photos in the
+                        background.
+                    </p>
+
+                    <div>
+                        <label for="query" class="block text-sm/6 font-medium text-white">Query</label>
+                        <div class="my-2">
+                            <input id="query" type="text" name="query" placeholder="forest drone"
+                                   x-model="config.input.query"
+                                   class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+                        </div>
+                        <p class="text-sm text-gray-400">The specified term will be used to search for background images</p>
+                    </div>
+
+                    <div>
+                        <label for="refreshInterval" class="block text-sm/6 font-medium text-white">Refresh interval</label>
+                        <div class="my-2">
+                            <input id="refreshInterval" type="number" min="1" step="1" name="refreshInterval" placeholder="10"
+                                   x-model="config.input.autoRefreshInterval"
+                                   class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+                        </div>
+                        <p class="text-sm text-gray-400">Background refresh interval in minutes</p>
+                    </div>
+
+                    <div class="flex gap-3 border border-white/10 rounded-md p-4">
+                        <div class="flex h-6 shrink-0 items-center">
+                            <div class="group grid size-4 grid-cols-1">
+                                <input id="autoRefresh" type="checkbox" name="autoRefresh"
+                                       x-model="config.input.autoRefresh"
+                                       class="col-start-1 row-start-1 appearance-none rounded-sm border border-white/10 bg-white/5 checked:border-indigo-500 checked:bg-indigo-500 indeterminate:border-indigo-500 indeterminate:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:border-white/5 disabled:bg-white/10 disabled:checked:bg-white/10 forced-colors:appearance-auto" />
+                                <svg viewBox="0 0 14 14" fill="none"
+                                     class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-white/25">
+                                    <path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                          class="opacity-0 group-has-checked:opacity-100" />
+                                    <path d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                          class="opacity-0 group-has-indeterminate:opacity-100" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="text-sm/6">
+                            <label for="autoRefresh" class="font-medium text-white">Auto refresh</label>
+                            <p class="text-gray-400">
+                                You can decide whether the photos should be refreshed automatically after a certain number of minutes
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            x-on:click="saveChanges"
+                            class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white cursor-pointer hover:bg-indigo-400 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        Save changes
+                    </button>
+                </div>
+            </div>
+        </dialog>
+    </div>
+</Layout>
+
+<script>
+    import Alpine from "alpinejs";
+    import { decode, isBlurhashValid } from "blurhash";
+    import { actions } from "astro:actions";
+    import { default as configStore } from "../alpine/stores/config.ts";
+    import { inputSchema } from "../schemas/input.ts";
+
+    // Waiting for AlpineJS initialization
+    document.addEventListener("alpine:init", () => {
+        const backgroundCanvas: HTMLElement | null = document.getElementById("background-canvas");
+        const backgroundBlurCanvas: HTMLElement | null = document.getElementById("background-blur-canvas");
+        const configurationDialog = document.getElementById("config-dialog");
+
+        Alpine.data("application", () => ({
+            config: configStore.fetch(),
+            init() {
+                const refreshDate = new Date(this.config.input.lastRefreshTimestamp);
+                const refreshDifference = ((new Date()).getTime() - refreshDate.getTime()) / (1000 * 60);
+
+                // Calculate the difference between last refresh and make a decision
+                if (this.config.input.autoRefresh && refreshDifference > this.config.input.autoRefreshInterval) {
+                    this.refreshBackground();
+                } else {
+                    this.renderBackground();
+                }
+            },
+            async refreshBackground() {
+
+                // Fetch config to have current data
+                this.config = configStore.fetch();
+
+                const { data, error } = await actions.refreshBackground({
+                    query: this.config.input.query
+                });
+
+                if (data && !error) {
+                    const refreshConfig = configStore.parseResponse(data, {
+                        ...this.config.input, ...{ lastRefreshTimestamp: Date.now() }
+                    });
+
+                    configStore.persist(refreshConfig);
+                    this.config = refreshConfig;
+                    this.renderBackground();
+                }
+            },
+            renderBackground() {
+                if (backgroundCanvas instanceof HTMLCanvasElement && backgroundBlurCanvas instanceof HTMLCanvasElement) {
+                    backgroundCanvas.classList.add("opacity-0");
+
+                    if (isBlurhashValid(this.config.background.blurHash).result) {
+                        const blurPixels = decode(this.config.background.blurHash, 32, 32);
+                        const ctx = backgroundBlurCanvas.getContext("2d");
+                        const imageData = ctx?.createImageData(32, 32) || null;
+
+                        if (imageData !== null) {
+                            imageData.data.set(blurPixels);
+                            ctx?.putImageData(imageData, 0, 0);
+                        }
+                    }
+
+                    // Source: https://stackoverflow.com/a/66180709
+                    // Wait until the image will be loaded and ready to render in the Canvas
+                    const backgroundImage = new Image(this.config.background.width, this.config.background.height);
+                    backgroundImage.src = this.config.background.image;
+                    backgroundImage.decode().then(() => {
+                        const ctx = backgroundCanvas.getContext("2d");
+
+                        // Change size
+                        backgroundCanvas.width = this.config.background.width;
+                        backgroundCanvas.height = this.config.background.height;
+
+                        // Draw image using drawImage function
+                        // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+                        ctx?.drawImage(backgroundImage, 0, 0, this.config.background.width, this.config.background.height);
+
+                        backgroundCanvas.classList.remove("opacity-0");
+                    });
+                }
+            },
+            openConfigurationDialog() {
+                if (configurationDialog instanceof HTMLDialogElement) {
+                    configurationDialog.show();
+                }
+            },
+            closeConfigurationDialog() {
+                if (configurationDialog instanceof HTMLDialogElement) {
+                    configurationDialog.close();
+                }
+            },
+            async saveChanges() {
+                const parseResult = inputSchema.safeParse(this.config.input);
+
+                if (parseResult.success) {
+                    configStore.persist(this.config);
+                    this.closeConfigurationDialog();
+                }
+            }
+        }));
+    });
+</script>

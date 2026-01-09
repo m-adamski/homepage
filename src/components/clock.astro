@@ -1,0 +1,23 @@
+---
+const currentDate = new Date();
+const currentTime = currentDate.toLocaleTimeString(
+    [], { hour12: false, hour: "2-digit", minute: "2-digit" }
+);
+---
+
+<div id="clock-container" class="absolute top-20 right-20 z-30 text-white font-semibold text-8xl text-shadow-lg/30 text-shadow-gray-900">
+    { currentTime }
+</div>
+
+<script>
+    setInterval(() => {
+        const currentDate = new Date();
+        const clockElement = document.getElementById("clock-container");
+
+        if (clockElement !== null) {
+            clockElement.innerHTML = currentDate.toLocaleTimeString(
+                [], { hour12: false, hour: "2-digit", minute: "2-digit" }
+            );
+        }
+    }, 1000);
+</script>
