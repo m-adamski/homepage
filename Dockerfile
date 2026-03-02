@@ -1,4 +1,4 @@
-FROM node:25.1-alpine AS base
+FROM node:25.7-alpine AS base
 
 # Define PNPM home directory
 ENV PNPM_HOME="/home/node/.pnpm"
@@ -36,7 +36,7 @@ COPY --from=dependencies /home/node/app/node_modules ./node_modules
 COPY . .
 
 # Build project
-RUN pnpm run build
+RUN /home/node/app/node_modules/.bin/astro build
 
 FROM base AS runtime
 
@@ -45,6 +45,7 @@ EXPOSE 4321
 ENV PORT=4321
 ENV HOST=0.0.0.0
 ENV NODE_ENV=production
+ENV TZ=Europe/Warsaw
 ENV ASTRO_TELEMETRY_DISABLED=1
 
 # Create group and user
@@ -55,18 +56,6 @@ WORKDIR /home/node/app
 
 COPY --from=dependencies --chown=astro:astro /home/node/app/node_modules ./node_modules
 COPY --from=build --chown=astro:astro /home/node/app/dist ./dist
-
-## Copy base files from BuildImage
-#COPY --from=build --chown=astro:astro /home/node/app/public ./public
-#
-## Set the correct permission for prerender cache
-#RUN mkdir .astro && \
-#    chown astro:astro .astro
-#
-## Automatically leverage output traces to reduce image size
-## https://nextjs.org/docs/advanced-features/output-file-tracing
-#COPY --from=build --chown=nextjs:nextjs /home/node/app/.next/standalone ./
-#COPY --from=build --chown=nextjs:nextjs /home/node/app/.next/static ./.next/static
 
 USER astro
 
