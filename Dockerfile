@@ -1,4 +1,4 @@
-FROM node:25.9-alpine AS base
+FROM node:26.7-alpine AS base
 
 # Define PNPM home directory
 ENV PNPM_HOME="/home/node/.pnpm"
@@ -18,7 +18,7 @@ WORKDIR /home/node/app
 
 # Install node packages
 # https://mannes.tech/production-install/
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
 FROM base AS build
